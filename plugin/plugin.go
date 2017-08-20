@@ -3,8 +3,8 @@ package plugin
 
 // Result is the response type of plugin execution.
 type Result struct {
-	Val interface{}
-	Err error
+	Val interface{} 	`json:"res"`
+	Err error			`json:"err,omitempty"`
 }
 
 // Plugin is the core type for extending go-monitor

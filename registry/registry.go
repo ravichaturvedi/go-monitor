@@ -4,6 +4,7 @@ import (
 	"log"
 	"errors"
 	"github.com/ravichaturvedi/go-monitor/plugin"
+	"sync"
 )
 
 var ErrPluginNotFound = errors.New("Plugin with the provided name is not available in registry.")
@@ -12,8 +13,8 @@ var ErrPluginNotFound = errors.New("Plugin with the provided name is not availab
 // Registry holds the available plugins and expose operations to be performed on those plugins.
 type Registry interface {
 
-	// Run the specified plugin name
-	Run(pluginName string) plugin.Result
+	// Run the specified plugin names and return back the result.
+	Run(pluginNames ...string) []plugin.Result
 
 	// List the available plugin names
 	PluginNames() []string
@@ -44,7 +45,25 @@ type defaultRegistry struct {
 	pluginsMap map[string]plugin.Plugin
 }
 
-func (r defaultRegistry) Run(pluginName string) plugin.Result {
+func (r defaultRegistry) Run(pluginNames ...string) []plugin.Result {
+	res := make([]plugin.Result, len(pluginNames))
+	var wg sync.WaitGroup
+	wg.Add(len(pluginNames))
+
+	// Forking go-routine for all the plugins.
+	for i, pluginName := range pluginNames {
+		go func(i int, pluginName string) {
+			res[i] = r.run(pluginName)
+			wg.Done()
+		}(i, pluginName)
+	}
+
+	// waiting for all the results to be returned.
+	wg.Wait()
+	return res
+}
+
+func (r defaultRegistry) run(pluginName string) plugin.Result {
 	if p := r.pluginsMap[pluginName]; p == nil {
 		return plugin.Result{nil, ErrPluginNotFound}
 	} else {

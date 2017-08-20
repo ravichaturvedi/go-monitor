@@ -1,8 +1,8 @@
 package scheduler
 
 import (
-	"github.com/ravichaturvedi/go-monitor/registry"
 	"time"
+	"github.com/ravichaturvedi/go-monitor/registry"
 	"github.com/ravichaturvedi/go-monitor/plugin"
 )
 
@@ -25,8 +25,8 @@ type durationScheduler struct {
 	results map[string] plugin.Result
 }
 
-func (s durationScheduler) Run(pluginName string) plugin.Result {
-	return s.r.Run(pluginName)
+func (s durationScheduler) Run(pluginNames ...string) []plugin.Result {
+	return s.r.Run(pluginNames...)
 }
 
 func (s durationScheduler) PluginNames() []string {
