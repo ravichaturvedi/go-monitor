@@ -65,11 +65,11 @@ func (s *durationScheduler) start(m map[string] time.Duration) {
 	var wg sync.WaitGroup
 	for name, duration := range m {
 		wg.Add(1)
-		go func() {
+		go func(name string, duration time.Duration) {
 			s.execPlugin(name)
 			wg.Done()
 			s.schedulePlugin(name, duration)
-		}()
+		}(name, duration)
 	}
 
 	// waiting for all the plugins to populate first result.
