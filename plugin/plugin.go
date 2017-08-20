@@ -1,10 +1,16 @@
 package plugin
 
 
+// Result is the response type of plugin execution.
+type Result struct {
+	Val interface{}
+	Err error
+}
+
 // Plugin is the core type for extending go-monitor
 type Plugin interface {
 	Name() string
-	Exec() (interface{}, error)
+	Exec() Result
 }
 
 
@@ -23,6 +29,7 @@ func (p defaultPlugin) Name() string {
 	return p.name
 }
 
-func (p defaultPlugin) Exec() (interface{}, error) {
-	return p.execFn()
+func (p defaultPlugin) Exec() Result {
+	val, err := p.execFn()
+	return Result{val, err}
 }

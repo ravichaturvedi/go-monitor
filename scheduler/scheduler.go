@@ -3,6 +3,7 @@ package scheduler
 import (
 	"github.com/ravichaturvedi/go-monitor/registry"
 	"time"
+	"github.com/ravichaturvedi/go-monitor/plugin"
 )
 
 // Scheduler schedule the plugins to run after every provided duration and exposes the Registry interface.
@@ -21,19 +22,13 @@ func New(r registry.Registry, m map[string] time.Duration) {
 
 type durationScheduler struct {
 	r registry.Registry
-	results map[string] resultHolder
+	results map[string] plugin.Result
 }
 
-func (s durationScheduler) Run(pluginName string) (interface{}, error) {
+func (s durationScheduler) Run(pluginName string) plugin.Result {
 	return s.r.Run(pluginName)
 }
 
 func (s durationScheduler) PluginNames() []string {
 	return s.r.PluginNames()
-}
-
-
-type resultHolder struct {
-	V interface{}
-	E error
 }

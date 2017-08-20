@@ -13,14 +13,19 @@ var ErrPluginNotFound = errors.New("Plugin with the provided name is not availab
 type Registry interface {
 
 	// Run the specified plugin name
-	Run(pluginName string) (interface{}, error)
+	Run(pluginName string) plugin.Result
 
 	// List the available plugin names
 	PluginNames() []string
 }
 
 
-func New(plugins ...plugin.Plugin) Registry {
+func New(plugins ...plugin.Plugin) (r Registry) {
+	// Identify the installed plugins from the returned registry.
+	defer func() {
+		log.Println("Installed plugins: ", r.PluginNames())
+	}()
+
 	// Creates the mapping between name and the plugin
 	m := make(map[string]plugin.Plugin)
 	for _, p := range plugins {
@@ -31,7 +36,6 @@ func New(plugins ...plugin.Plugin) Registry {
 		m[p.Name()] = p
 	}
 
-	log.Println("Identified plugins: ", m)
 	// Create the registry with the mapping.
 	return defaultRegistry{m}
 }
@@ -40,9 +44,9 @@ type defaultRegistry struct {
 	pluginsMap map[string]plugin.Plugin
 }
 
-func (r defaultRegistry) Run(pluginName string) (interface{}, error) {
+func (r defaultRegistry) Run(pluginName string) plugin.Result {
 	if p := r.pluginsMap[pluginName]; p == nil {
-		return nil, ErrPluginNotFound
+		return plugin.Result{nil, ErrPluginNotFound}
 	} else {
 		log.Println("Executing plugin: ", pluginName)
 		return p.Exec()
