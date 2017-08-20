@@ -58,6 +58,10 @@ func (s durationScheduler) PluginNames() []string {
 }
 
 func (s *durationScheduler) start(m map[string] time.Duration) {
+	defer func() {
+		log.Println("Started scheduler with: ", m)
+	}()
+
 	var wg sync.WaitGroup
 	for name, duration := range m {
 		wg.Add(1)

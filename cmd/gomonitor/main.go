@@ -8,12 +8,14 @@ import (
 	"github.com/ravichaturvedi/go-monitor/server"
 	"github.com/ravichaturvedi/go-monitor/handler"
 	"github.com/ravichaturvedi/go-monitor/scheduler"
+	"math/rand"
 )
 
 
 func main() {
-	r := registry.New(map[string]plugin.Plugin{"hello": plugin.NewHelloWorld()})
-	r = scheduler.New(r, map[string]time.Duration{"hello": time.Second})
+	p := plugins()
+	r := registry.New(p)
+	r = scheduler.New(r, pluginsDuration(p))
 
 	s := server.New(handler.New(r))
 
@@ -22,3 +24,21 @@ func main() {
 	}
 }
 
+
+
+func plugins() map[string]plugin.Plugin {
+	return map[string]plugin.Plugin {
+		"hello": plugin.NewHelloWorld(),
+		"google": plugin.NewWebsiteStatus("https://www.google.com"),
+		"facebook": plugin.NewWebsiteStatus("https://www.facebook.com"),
+	}
+}
+
+
+func pluginsDuration(plugins map[string]plugin.Plugin) map[string]time.Duration {
+	m := map[string]time.Duration{}
+	for name, _ := range plugins {
+		m[name] = time.Duration(rand.Intn(3) + 1) * time.Second
+	}
+	return m
+}
