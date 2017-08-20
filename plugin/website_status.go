@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-func NewWebsiteStatus(url string) Plugin {
+func NewURLStatus(url string) Plugin {
 	return New(func() (interface{}, error) {
 		res, err := http.Get(url)
 		if err != nil {
