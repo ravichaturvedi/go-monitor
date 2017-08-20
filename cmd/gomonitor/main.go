@@ -12,12 +12,8 @@ import (
 
 
 func main() {
-	hwp := plugin.New(func() (interface{}, error) {
-		return "Hello World!", nil
-	})
-
-	r := registry.New(map[string]plugin.Plugin{"helloworld": hwp})
-	r = scheduler.New(r, map[string]time.Duration{"helloworld": time.Second})
+	r := registry.New(map[string]plugin.Plugin{"hello": plugin.NewHelloWorld()})
+	r = scheduler.New(r, map[string]time.Duration{"hello": time.Second})
 
 	s := server.New(handler.New(r))
 
