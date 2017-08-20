@@ -1,10 +1,19 @@
 package plugin
 
+import "encoding/json"
 
 // Result is the response type of plugin execution.
 type Result struct {
-	Val interface{} 	`json:"res"`
-	Err error			`json:"err,omitempty"`
+	Val interface{}
+	Err error
+}
+
+func (r Result) MarshalJSON() ([]byte, error) {
+	if r.Err == nil {
+		return json.Marshal(map[string]interface{}{"msg": r.Val})
+	}
+
+	return json.Marshal(map[string]interface{}{"msg": r.Val, "err": r.Err.Error()})
 }
 
 // Plugin is the core type for extending go-monitor
