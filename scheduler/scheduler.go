@@ -30,7 +30,25 @@ type durationScheduler struct {
 }
 
 func (s durationScheduler) Run(pluginNames ...string) []plugin.Result {
-	return s.r.Run(pluginNames...)
+	var wg sync.WaitGroup
+	res := make([]plugin.Result, len(pluginNames))
+
+	// Try to get the cache plugin Result populated during scheduled execution
+	// Otherwise, get the result from the underlying registry.
+	for i, pluginName := range pluginNames {
+		if r, ok := s.results[pluginName]; ok {
+			res[i] = r
+		} else {
+			wg.Add(1)
+			go func(i int, pluginName string) {
+				res[i] = s.r.Run(pluginName)[0]
+				wg.Done()
+			}(i, pluginName)
+		}
+	}
+
+	wg.Wait()
+	return res
 }
 
 func (s durationScheduler) PluginNames() []string {
