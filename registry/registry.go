@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-var ErrPluginNotFound = errors.New("Plugin with the provided name is not available in registry.")
+var ErrPluginNotFound = errors.New("Plugin not present in registry.")
 
 
 // Registry holds the available plugins and expose operations to be performed on those plugins.
