@@ -56,6 +56,7 @@ func (h requestHandler) pluginHandler(writer http.ResponseWriter, request *http.
 
 func writeTo(writer http.ResponseWriter, v interface{}) {
 	if data, err := json.Marshal(v); err == nil {
+		writer.Header().Add("Content-Type", "application/json")
 		writer.Write(data)
 	} else {
 		writer.WriteHeader(500)
