@@ -21,24 +21,14 @@ type Registry interface {
 }
 
 
-func New(plugins ...plugin.Plugin) (r Registry) {
+func New(plugins map[string]plugin.Plugin) (r Registry) {
 	// Identify the installed plugins from the returned registry.
 	defer func() {
 		log.Println("Installed plugins: ", r.PluginNames())
 	}()
 
-	// Creates the mapping between name and the plugin
-	m := make(map[string]plugin.Plugin)
-	for _, p := range plugins {
-		if _, ok := m[p.Name()]; ok {
-			panic("Duplicate plugin found with name: " + p.Name())
-		}
-
-		m[p.Name()] = p
-	}
-
 	// Create the registry with the mapping.
-	return defaultRegistry{m}
+	return defaultRegistry{plugins}
 }
 
 type defaultRegistry struct {

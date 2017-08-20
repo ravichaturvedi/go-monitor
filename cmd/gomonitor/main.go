@@ -12,12 +12,13 @@ import (
 
 
 func main() {
-	hwp := plugin.New("helloworld", func() (interface{}, error) {
+	hwp := plugin.New(func() (interface{}, error) {
 		return "Hello World!", nil
 	})
 
-	r := registry.New(hwp)
+	r := registry.New(map[string]plugin.Plugin{"helloworld": hwp})
 	r = scheduler.New(r, map[string]time.Duration{"helloworld": time.Second})
+
 	s := server.New(handler.New(r))
 
 	if err := s.Serve(); err != nil {
