@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"time"
+	"sync"
 	"github.com/ravichaturvedi/go-monitor/registry"
 	"github.com/ravichaturvedi/go-monitor/plugin"
 )
@@ -15,14 +16,17 @@ type Scheduler interface {
 }
 
 
-func New(r registry.Registry, m map[string] time.Duration) {
-
+func New(r registry.Registry, m map[string] time.Duration) Scheduler {
+	s := &durationScheduler{r:r, results: make(map[string] plugin.Result)}
+	s.start(m)
+	return s
 }
 
 
 type durationScheduler struct {
 	r registry.Registry
 	results map[string] plugin.Result
+	sync.Mutex
 }
 
 func (s durationScheduler) Run(pluginNames ...string) []plugin.Result {
@@ -31,4 +35,34 @@ func (s durationScheduler) Run(pluginNames ...string) []plugin.Result {
 
 func (s durationScheduler) PluginNames() []string {
 	return s.r.PluginNames()
+}
+
+func (s *durationScheduler) start(m map[string] time.Duration) {
+	var wg sync.WaitGroup
+	for name, duration := range m {
+		wg.Add(1)
+		go func() {
+			s.execPlugin(name)
+			wg.Done()
+			s.schedulePlugin(name, duration)
+		}()
+	}
+
+	// waiting for all the plugins to populate first result.
+	wg.Wait()
+}
+
+func (s *durationScheduler) schedulePlugin(name string, d time.Duration) {
+	for range time.NewTicker(d).C {
+		s.execPlugin(name)
+	}
+}
+
+func (s *durationScheduler) execPlugin(name string) {
+	r := s.r.Run(name)
+
+	// Store the value in result map
+	s.Lock()
+	s.results[name] = r[0]
+	s.Unlock()
 }
