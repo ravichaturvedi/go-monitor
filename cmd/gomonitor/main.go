@@ -1,27 +1,16 @@
 package main
 
 import (
-	"log"
 	"time"
-	"github.com/ravichaturvedi/go-monitor/registry"
-	"github.com/ravichaturvedi/go-monitor/plugin"
-	"github.com/ravichaturvedi/go-monitor/server"
-	"github.com/ravichaturvedi/go-monitor/handler"
-	"github.com/ravichaturvedi/go-monitor/scheduler"
 	"math/rand"
+	"github.com/ravichaturvedi/go-monitor/plugin"
+	"github.com/ravichaturvedi/go-monitor/monitor"
 )
 
 
 func main() {
 	p := plugins()
-	r := registry.New(p)
-	r = scheduler.New(r, pluginsDuration(p))
-
-	s := server.New(handler.New(r))
-
-	if err := s.Serve(); err != nil {
-		log.Fatal("Error while starting server: ", err)
-	}
+	monitor.New(p, pluginsDuration(p)).Start()
 }
 
 
