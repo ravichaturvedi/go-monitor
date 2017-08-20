@@ -29,6 +29,7 @@ func main() {
 func plugins() map[string]plugin.Plugin {
 	return map[string]plugin.Plugin {
 		"hello": plugin.NewHelloWorld(),
+		"random": plugin.NewRandomFailure(),
 		"google": plugin.NewWebsiteStatus("https://www.google.com"),
 		"facebook": plugin.NewWebsiteStatus("https://www.facebook.com"),
 	}
