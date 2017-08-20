@@ -31,7 +31,7 @@ func New(plugins ...plugin.Plugin) Registry {
 		m[p.Name()] = p
 	}
 
-	log.Println("Starting with plugins: ", m)
+	log.Println("Identified plugins: ", m)
 	// Create the registry with the mapping.
 	return defaultRegistry{m}
 }
@@ -50,7 +50,7 @@ func (r defaultRegistry) Run(pluginName string) (interface{}, error) {
 }
 
 func (r defaultRegistry) PluginNames() []string {
-	names := make([]string, len(r.pluginsMap))
+	var names []string
 	for n, _ := range r.pluginsMap {
 		names = append(names, n)
 	}
