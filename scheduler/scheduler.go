@@ -5,6 +5,7 @@ import (
 	"sync"
 	"github.com/ravichaturvedi/go-monitor/registry"
 	"github.com/ravichaturvedi/go-monitor/plugin"
+	"log"
 )
 
 // Scheduler schedule the plugins to run after every provided duration and exposes the Registry interface.
@@ -37,6 +38,7 @@ func (s durationScheduler) Run(pluginNames ...string) []plugin.Result {
 	// Otherwise, get the result from the underlying registry.
 	for i, pluginName := range pluginNames {
 		if r, ok := s.results[pluginName]; ok {
+			log.Println("Returning cached result for plugin: " + pluginName)
 			res[i] = r
 		} else {
 			wg.Add(1)
