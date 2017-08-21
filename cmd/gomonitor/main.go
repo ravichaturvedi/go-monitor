@@ -17,6 +17,7 @@ package main
 
 import (
 	"time"
+	"context"
 	"math/rand"
 	"github.com/ravichaturvedi/go-monitor/plugin"
 	"github.com/ravichaturvedi/go-monitor/monitor"
@@ -25,7 +26,7 @@ import (
 
 func main() {
 	p := plugins()
-	monitor.New(p, pluginsDuration(p)).Start()
+	monitor.New(p, pluginsDuration(p)).Start(context.Background())
 }
 
 

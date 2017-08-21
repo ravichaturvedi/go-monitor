@@ -18,6 +18,7 @@ package monitor
 import (
 	"log"
 	"time"
+	"context"
 	"github.com/ravichaturvedi/go-monitor/handler"
 	"github.com/ravichaturvedi/go-monitor/registry"
 	"github.com/ravichaturvedi/go-monitor/scheduler"
@@ -27,7 +28,7 @@ import (
 
 
 type Monitor interface {
-	Start()
+	Start(ctx context.Context)
 }
 
 func New(pluginMap map[string]plugin.Plugin, durationMap map[string]time.Duration) Monitor {
@@ -40,13 +41,19 @@ type defaultMonitor struct {
 	durationMap map[string]time.Duration
 }
 
-func (m defaultMonitor) Start() {
+func (m defaultMonitor) Start(ctx context.Context) {
 	r := registry.New(m.pluginMap)
-	r = scheduler.New(r, m.durationMap)
+	sch := scheduler.New(r, m.durationMap)
+	ser := server.New(handler.New(r))
 
-	s := server.New(handler.New(r))
+	go func() {
+		// wait for the done channel to close
+		<- ctx.Done()
+		sch.Shutdown()
+		ser.Shutdown()
+	}()
 
-	if err := s.Serve(); err != nil {
+	if err := ser.Serve(); err != nil {
 		log.Fatal("Error while starting server: ", err)
 	}
 }

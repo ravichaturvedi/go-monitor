@@ -29,6 +29,7 @@ import (
 // If the scheduling information is not found for the plugin name then delegate the call to underlying registry.
 type Scheduler interface {
 	registry.Registry
+	Shutdown()
 }
 
 
@@ -43,6 +44,7 @@ type durationScheduler struct {
 	r registry.Registry
 	results map[string] plugin.Result
 	sync.Mutex
+	tickers []*time.Ticker
 }
 
 func (s durationScheduler) Run(pluginNames ...string) []plugin.Result {
@@ -92,7 +94,12 @@ func (s *durationScheduler) start(m map[string] time.Duration) {
 }
 
 func (s *durationScheduler) schedulePlugin(name string, d time.Duration) {
-	for range time.NewTicker(d).C {
+	t := time.NewTicker(d)
+	s.Lock()
+	s.tickers = append(s.tickers, t)
+	s.Unlock()
+
+	for range t.C {
 		s.execPlugin(name)
 	}
 }
@@ -104,4 +111,10 @@ func (s *durationScheduler) execPlugin(name string) {
 	s.Lock()
 	s.results[name] = r[0]
 	s.Unlock()
+}
+
+func (s *durationScheduler) Shutdown() {
+	for _, t := range s.tickers {
+		t.Stop()
+	}
 }

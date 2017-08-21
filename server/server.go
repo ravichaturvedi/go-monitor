@@ -19,30 +19,40 @@ import (
 	"net/http"
 	"log"
 	"fmt"
+	"time"
+	"context"
 )
 
 
 // Server is interface to expose the registry to the outside world.
 type Server interface {
 	Serve() error
+	Shutdown() error
 }
 
 func New(h http.Handler) Server {
-	return httpServer{h}
+	return &httpServer{h, nil}
 }
 
 
 type httpServer struct {
 	h http.Handler
+	hs *http.Server
 }
 
 
-func (s httpServer) Serve() error {
-	// Register the handler to respond to the queries.
-	http.Handle("/", s.h)
+func (s *httpServer) Serve() error {
+	hs := &http.Server{
+		Addr:           ":1234",
+		Handler:        s.h,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+	}
 
 	log.Println(fmt.Sprintf("Starting server: http://0.0.0.0:1234"))
+	return hs.ListenAndServe()
+}
 
-	// Start the server to listen on all the interfaces on port `1234`
-	return http.ListenAndServe(":1234", nil)
+func (s *httpServer) Shutdown() error {
+	return s.hs.Shutdown(context.TODO())
 }
