@@ -42,7 +42,7 @@ type httpServer struct {
 
 
 func (s *httpServer) Serve() error {
-	hs := &http.Server{
+	s.hs = &http.Server{
 		Addr:           ":1234",
 		Handler:        s.h,
 		ReadTimeout:    10 * time.Second,
@@ -50,7 +50,7 @@ func (s *httpServer) Serve() error {
 	}
 
 	log.Println(fmt.Sprintf("Starting server: http://0.0.0.0:1234"))
-	return hs.ListenAndServe()
+	return s.hs.ListenAndServe()
 }
 
 func (s *httpServer) Shutdown() error {

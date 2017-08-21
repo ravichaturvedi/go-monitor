@@ -54,6 +54,6 @@ func (m defaultMonitor) Start(ctx context.Context) {
 	}()
 
 	if err := ser.Serve(); err != nil {
-		log.Fatal("Error while starting server: ", err)
+		log.Println("Error while starting server: ", err)
 	}
 }
